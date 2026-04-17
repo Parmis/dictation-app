@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+dist/
+target/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.sw?
+
+# Build artifacts
+*.dmg
+*.exe
+*.msi
+*.app
+*.deb
+*.AppImage
