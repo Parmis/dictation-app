@@ -2,6 +2,8 @@
 
 A desktop dictation app built with Tauri v2 (React + Rust) and a lightweight Node.js backend.
 
+- App to convert speech to text.
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v18+
