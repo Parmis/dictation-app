@@ -8,7 +8,7 @@ exports.up = (pgm) => {
 
   pgm.createTable("users", {
     id: { type: "uuid", primaryKey: true, default: pgm.func("gen_random_uuid()") },
-    email: { type: "text", notNull: true },
+    email: { type: "text", notNull: true, unique: true },
     organization_id: { type: "uuid", notNull: true, references: "organizations" },
     created_at: { type: "timestamptz", notNull: true, default: pgm.func("now()") },
   });

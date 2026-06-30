@@ -1,11 +1,13 @@
+require('dotenv').config({ path: '../.env' });
+
+const host = process.env.PGHOST || "localhost";
+const port = process.env.PGPORT || "5432";
+const db = process.env.PGDATABASE || "dictation";
+const user = process.env.PGUSER || "dictation";
+const pass = process.env.PGPASSWORD || "dictation";
+
 module.exports = {
-  databaseUrl: {
-    host: process.env.PGHOST || "localhost",
-    port: parseInt(process.env.PGPORT || "5432", 10),
-    database: process.env.PGDATABASE || "dictation",
-    user: process.env.PGUSER || "dictation",
-    password: process.env.PGPASSWORD || "dictation",
-  },
+  databaseUrl: `postgresql://${user}:${pass}@${host}:${port}/${db}`,
   dir: "migrations",
   "migration-file-language": "cjs",
 };

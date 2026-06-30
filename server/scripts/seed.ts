@@ -2,7 +2,7 @@ import crypto from "crypto";
 import pg from "pg";
 import dotenv from "dotenv";
 
-dotenv.config({ path: "../../.env" });
+dotenv.config({ path: "../.env" });
 
 const pool = new pg.Pool({
   host: process.env.PGHOST || "localhost",
@@ -30,17 +30,11 @@ async function seed() {
     const userResult = await client.query(
       `INSERT INTO users (email, organization_id)
        VALUES ('dev@localhost', $1)
-       ON CONFLICT DO NOTHING
+       ON CONFLICT (email) DO UPDATE SET organization_id = $1
        RETURNING id`,
       [orgId],
     );
-    let userId = userResult.rows[0]?.id;
-    if (!userId) {
-      const existing = await client.query(
-        `SELECT id FROM users WHERE email = 'dev@localhost'`,
-      );
-      userId = existing.rows[0].id;
-    }
+    const userId = userResult.rows[0].id;
 
     // Create token
     const token = crypto.randomBytes(32).toString("hex");

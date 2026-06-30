@@ -2,7 +2,7 @@ import crypto from "crypto";
 import pg from "pg";
 import dotenv from "dotenv";
 
-dotenv.config({ path: "../../.env" });
+dotenv.config({ path: "../.env" });
 
 const pool = new pg.Pool({
   host: process.env.PGHOST || "localhost",

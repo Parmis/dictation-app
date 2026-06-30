@@ -5,6 +5,8 @@ import { createServer } from "http";
 import { config } from "./config.js";
 import healthRouter from "./routes/health.js";
 import authRouter from "./routes/auth.js";
+import adminRouter from "./routes/admin.js";
+import recordingsRouter from "./routes/recordings.js";
 import { setupWebSocket } from "./routes/audio.js";
 
 const app = express();
@@ -15,12 +17,8 @@ app.use(express.json());
 
 app.use(healthRouter);
 app.use(authRouter);
-
-// POST /api/v1/dictation/finalize — placeholder
-app.post("/api/v1/dictation/finalize", (_req, res) => {
-  // TODO: Store final transcript + session metadata
-  res.json({ status: "ok" });
-});
+app.use(adminRouter);
+app.use(recordingsRouter);
 
 const server = createServer(app);
 setupWebSocket(server);

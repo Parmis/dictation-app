@@ -12,21 +12,26 @@ const pairLimiter = rateLimit({
 });
 
 router.post("/api/v1/shortcode/pair", pairLimiter, async (req, res) => {
-  const { shortcode } = req.body;
+  try {
+    const { shortcode } = req.body;
 
-  if (!shortcode || typeof shortcode !== "string") {
-    res.status(400).json({ error: "shortcode is required" });
-    return;
+    if (!shortcode || typeof shortcode !== "string") {
+      res.status(400).json({ error: "shortcode is required" });
+      return;
+    }
+
+    const result = await lookupAndUseShortcode(shortcode.trim());
+
+    if (!result) {
+      res.status(404).json({ error: "Invalid or expired shortcode" });
+      return;
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error("Pairing error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  const result = await lookupAndUseShortcode(shortcode.trim());
-
-  if (!result) {
-    res.status(404).json({ error: "Invalid or expired shortcode" });
-    return;
-  }
-
-  res.json(result);
 });
 
 router.get("/me", authMiddleware, (_req, res) => {

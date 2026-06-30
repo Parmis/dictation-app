@@ -1,10 +1,14 @@
 import { pool } from "./pool.js";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function validateToken(
   token: string,
   organizationSlug: string,
   userId: string,
 ): Promise<boolean> {
+  if (!UUID_RE.test(userId)) return false;
+
   const result = await pool.query(
     `SELECT ot.id
      FROM organization_tokens ot

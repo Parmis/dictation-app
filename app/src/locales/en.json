@@ -1,0 +1,32 @@
+{
+  "app": {
+    "title": "Dictation",
+    "pairing": {
+      "heading": "Dictation",
+      "description": "Enter your pairing code to get started.",
+      "placeholder": "Enter shortcode",
+      "button": "Pair",
+      "loading": "Pairing..."
+    },
+    "dictation": {
+      "record": "Record",
+      "stop": "Stop",
+      "clear": "Clear",
+      "listening": "Listening...",
+      "pressRecord": "Press Record to start dictation",
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "settings": {
+      "heading": "Settings",
+      "microphone": "Microphone",
+      "systemDefault": "System default",
+      "hotkey": "Hotkey",
+      "hotkeyHint": "Press this key to toggle recording",
+      "back": "Back"
+    },
+    "auth": {
+      "logout": "Logout"
+    }
+  }
+}
