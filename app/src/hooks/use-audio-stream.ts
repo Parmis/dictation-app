@@ -1,9 +1,13 @@
 import { useState, useCallback, useRef } from "react";
 import { DictationWebSocket } from "../lib/websocket";
 import { AudioCapture } from "../lib/audio";
-import type { Credentials } from "../types";
+import { createRecording } from "../lib/api";
+import type { Credentials, Recording } from "../types";
 
-export function useAudioStream(credentials: Credentials | null) {
+export function useAudioStream(
+  credentials: Credentials | null,
+  onSaved?: (recording: Recording) => void,
+) {
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [connected, setConnected] = useState(false);
@@ -11,6 +15,9 @@ export function useAudioStream(credentials: Credentials | null) {
 
   const wsRef = useRef<DictationWebSocket | null>(null);
   const audioRef = useRef<AudioCapture | null>(null);
+  const transcriptRef = useRef("");
+  const credentialsRef = useRef(credentials);
+  credentialsRef.current = credentials;
 
   const start = useCallback(
     async (deviceId?: string) => {
@@ -21,9 +28,11 @@ export function useAudioStream(credentials: Credentials | null) {
         const ws = new DictationWebSocket(
           (msg) => {
             if (msg.type === "transcript" && msg.text) {
-              setTranscript((prev) =>
-                msg.isFinal ? prev + msg.text + " " : prev,
-              );
+              setTranscript((prev) => {
+                const next = msg.isFinal ? prev + msg.text + " " : prev;
+                transcriptRef.current = next;
+                return next;
+              });
             }
           },
           () => {
@@ -48,16 +57,35 @@ export function useAudioStream(credentials: Credentials | null) {
     [credentials],
   );
 
-  const stop = useCallback(() => {
+  const stop = useCallback(async () => {
     audioRef.current?.stop();
     audioRef.current = null;
     wsRef.current?.close();
     wsRef.current = null;
     setRecording(false);
     setConnected(false);
-  }, []);
+
+    const finalTranscript = transcriptRef.current.trim();
+    const creds = credentialsRef.current;
+
+    if (finalTranscript && creds) {
+      try {
+        const title = finalTranscript.split(/\s+/).slice(0, 6).join(" ");
+        const saved = await createRecording(creds, finalTranscript, title);
+        onSaved?.(saved);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to save recording",
+        );
+      }
+    }
+
+    transcriptRef.current = "";
+    setTranscript("");
+  }, [onSaved]);
 
   const clearTranscript = useCallback(() => {
+    transcriptRef.current = "";
     setTranscript("");
   }, []);
 
