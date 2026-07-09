@@ -23,16 +23,6 @@ export function useRecordings(credentials: Credentials | null) {
     }
   }, [credentials]);
 
-  const create = useCallback(
-    async (text: string, title: string) => {
-      if (!credentials) return null;
-      const recording = await api.createRecording(credentials, text, title);
-      setRecordings((prev) => [recording, ...prev]);
-      return recording;
-    },
-    [credentials],
-  );
-
   const update = useCallback(
     async (id: string, patch: Partial<Pick<Recording, "title" | "text">>) => {
       if (!credentials) return null;
@@ -52,5 +42,5 @@ export function useRecordings(credentials: Credentials | null) {
     [credentials],
   );
 
-  return { recordings, loading, error, fetchAll, create, update, remove };
+  return { recordings, loading, error, fetchAll, update, remove };
 }
