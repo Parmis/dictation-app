@@ -77,7 +77,7 @@ export function useAudioStream(
         setError(
           err instanceof Error ? err.message : "Failed to save recording",
         );
-        // Keep the transcript so the user can retry or copy it
+        // Keep the transcript so the user can copy it (or clear it manually)
         return;
       }
     }
