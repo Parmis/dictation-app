@@ -26,7 +26,7 @@ function App() {
     remove,
   } = useRecordings(credentials);
 
-  const handleSaved = useCallback(() => {
+  const openRecordings = useCallback(() => {
     setScreen("recordings");
     fetchAll();
   }, [fetchAll]);
@@ -39,7 +39,7 @@ function App() {
     start,
     stop,
     clearTranscript,
-  } = useAudioStream(credentials, handleSaved);
+  } = useAudioStream(credentials, openRecordings);
 
   const toggleRecording = useCallback(() => {
     if (recording) {
@@ -109,6 +109,7 @@ function App() {
       onClear={clearTranscript}
       onLogout={logout}
       onSettings={() => setScreen("settings")}
+      onRecordings={openRecordings}
     />
   );
 }

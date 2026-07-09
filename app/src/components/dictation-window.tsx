@@ -8,6 +8,7 @@ interface DictationWindowProps {
   onClear: () => void;
   onLogout: () => void;
   onSettings: () => void;
+  onRecordings: () => void;
 }
 
 export function DictationWindow({
@@ -20,6 +21,7 @@ export function DictationWindow({
   onClear,
   onLogout,
   onSettings,
+  onRecordings,
 }: DictationWindowProps) {
   return (
     <div className="screen dictation-screen">
@@ -31,6 +33,9 @@ export function DictationWindow({
           >
             {connected ? "Connected" : "Disconnected"}
           </span>
+          <button className="btn-secondary" onClick={onRecordings}>
+            Recordings
+          </button>
           <button className="btn-icon" onClick={onSettings} title="Settings">
             ⚙
           </button>
