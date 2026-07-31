@@ -1,4 +1,20 @@
-# Dictation App — Development Plan
+# Dictation App — Recordings Development Plan
+
+> **Status: ✅ Completed (July 2026).** This is a historical planning document, kept for reference.
+> The code is the source of truth; details below (endpoint lists, code snippets) may have drifted.
+> For current setup and API docs see the [README](../../README.md); for what's next see the [roadmap](../../ROADMAP.md).
+
+## Phase Status
+
+- [x] Phase 1 — Data Model (`Recording` type, `recordings` table + migration)
+- [x] Phase 2 — Backend API (recordings CRUD routes + DB helpers)
+- [x] Phase 3 — Frontend: save on stop
+- [x] Phase 4 — Frontend: recordings list & detail screens
+- [x] Phase 5 — OpenAI integration (`POST /api/v1/recordings/:id/process` + "Process with AI" button)
+
+Known drift from this plan as implemented: the `useRecordings` hook has no `create`
+function (recordings are created by the audio-stream hook on stop), and the AI
+processing function is named `processWithAI`.
 
 ## Current State
 
@@ -169,9 +185,7 @@ pairing → dictation ↔ recordings ↔ recording-detail
 
 ---
 
-## Phase 5 — Future: OpenAI Integration
-
-When ready to add AI formatting:
+## Phase 5 — OpenAI Integration
 
 **Backend**: `POST /api/v1/recordings/:id/process`
 - Reads the recording text
