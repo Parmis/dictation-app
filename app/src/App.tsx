@@ -23,6 +23,7 @@ function App() {
     loading: recordingsLoading,
     fetchAll,
     update,
+    processWithAI,
     remove,
   } = useRecordings(credentials);
 
@@ -86,6 +87,10 @@ function App() {
         recording={selectedRecording}
         onSave={async (id, patch) => {
           const updated = await update(id, patch);
+          if (updated) setSelectedRecording(updated);
+        }}
+        onProcess={async (id) => {
+          const updated = await processWithAI(id);
           if (updated) setSelectedRecording(updated);
         }}
         onDelete={async (id) => {

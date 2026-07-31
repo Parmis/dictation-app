@@ -8,6 +8,7 @@ interface RecordingDetailProps {
     patch: { title?: string; text?: string },
   ) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onProcess: (id: string) => Promise<void>;
   onBack: () => void;
 }
 
@@ -15,11 +16,13 @@ export function RecordingDetail({
   recording,
   onSave,
   onDelete,
+  onProcess,
   onBack,
 }: RecordingDetailProps) {
   const [title, setTitle] = useState(recording.title);
   const [text, setText] = useState(recording.text);
   const [saving, setSaving] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +44,18 @@ export function RecordingDetail({
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleProcess = async () => {
+    setProcessing(true);
+    setError(null);
+    try {
+      await onProcess(recording.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to process");
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -92,6 +107,14 @@ export function RecordingDetail({
           disabled={!dirty || saving}
         >
           {saving ? "Saving..." : "Save"}
+        </button>
+        <button
+          className="btn-secondary"
+          onClick={handleProcess}
+          disabled={processing || saving || dirty}
+          title={dirty ? "Save your changes first" : undefined}
+        >
+          {processing ? "Processing..." : "Process with AI"}
         </button>
         <button
           className={`btn-secondary${confirmingDelete ? " btn-danger" : ""}`}

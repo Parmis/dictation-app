@@ -3,6 +3,7 @@ import {
   listRecordings,
   createRecording,
   updateRecording,
+  processRecording,
   deleteRecording,
 } from "../src/lib/api";
 import type { Credentials } from "../src/types";
@@ -85,6 +86,20 @@ describe("updateRecording", () => {
     expect(url).toBe("http://localhost:3000/api/v1/recordings/rec-1");
     expect(init.method).toBe("PUT");
     expect(JSON.parse(init.body)).toEqual({ title: "New" });
+  });
+});
+
+describe("processRecording", () => {
+  it("POSTs to /recordings/:id/process and returns the updated recording", async () => {
+    const processed = { ...recording, text: "Hello world." };
+    fetchMock.mockResolvedValue(jsonResponse(processed));
+
+    const result = await processRecording(credentials, "rec-1");
+
+    expect(result).toEqual(processed);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://localhost:3000/api/v1/recordings/rec-1/process");
+    expect(init.method).toBe("POST");
   });
 });
 

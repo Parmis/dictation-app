@@ -25,8 +25,14 @@ vi.mock("../src/db/recordings.js", () => ({
   deleteRecording: vi.fn(),
 }));
 
+vi.mock("../src/services/openai.js", () => ({
+  isAiConfigured: vi.fn(() => true),
+  processTranscript: vi.fn(),
+}));
+
 import recordingsRouter from "../src/routes/recordings.js";
 import * as db from "../src/db/recordings.js";
+import * as openai from "../src/services/openai.js";
 
 const USER_ID = "11111111-1111-1111-1111-111111111111";
 const RECORDING_ID = "22222222-2222-2222-2222-222222222222";
@@ -71,6 +77,8 @@ beforeEach(() => {
   vi.mocked(db.getRecording).mockReset();
   vi.mocked(db.updateRecording).mockReset();
   vi.mocked(db.deleteRecording).mockReset();
+  vi.mocked(openai.processTranscript).mockReset();
+  vi.mocked(openai.isAiConfigured).mockReset().mockReturnValue(true);
 });
 
 describe("auth", () => {
@@ -273,6 +281,78 @@ describe("PUT /api/v1/recordings/:id", () => {
     );
 
     expect(res.status).toBe(404);
+  });
+});
+
+describe("POST /api/v1/recordings/:id/process", () => {
+  it("processes the text and returns the updated recording", async () => {
+    const processed = {
+      ...sampleRecording,
+      text: "Hello world. This is a test.",
+    };
+    vi.mocked(db.getRecording).mockResolvedValue(sampleRecording);
+    vi.mocked(openai.processTranscript).mockResolvedValue(
+      "Hello world. This is a test.",
+    );
+    vi.mocked(db.updateRecording).mockResolvedValue(processed);
+
+    const res = await fetch(
+      `${baseUrl}/api/v1/recordings/${RECORDING_ID}/process`,
+      { method: "POST", headers: authHeaders },
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(processed);
+    expect(openai.processTranscript).toHaveBeenCalledWith(
+      sampleRecording.text,
+    );
+    expect(db.updateRecording).toHaveBeenCalledWith(USER_ID, RECORDING_ID, {
+      text: "Hello world. This is a test.",
+    });
+  });
+
+  it("returns 503 when OPENAI_API_KEY is not configured", async () => {
+    vi.mocked(openai.isAiConfigured).mockReturnValue(false);
+
+    const res = await fetch(
+      `${baseUrl}/api/v1/recordings/${RECORDING_ID}/process`,
+      { method: "POST", headers: authHeaders },
+    );
+
+    expect(res.status).toBe(503);
+    expect(openai.processTranscript).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 when the recording does not exist", async () => {
+    vi.mocked(db.getRecording).mockResolvedValue(null);
+
+    const res = await fetch(
+      `${baseUrl}/api/v1/recordings/${RECORDING_ID}/process`,
+      { method: "POST", headers: authHeaders },
+    );
+
+    expect(res.status).toBe(404);
+    expect(openai.processTranscript).not.toHaveBeenCalled();
+  });
+
+  it("returns 502 when OpenAI fails and does not update the recording", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    vi.mocked(db.getRecording).mockResolvedValue(sampleRecording);
+    vi.mocked(openai.processTranscript).mockRejectedValue(
+      new Error("openai down"),
+    );
+
+    const res = await fetch(
+      `${baseUrl}/api/v1/recordings/${RECORDING_ID}/process`,
+      { method: "POST", headers: authHeaders },
+    );
+
+    expect(res.status).toBe(502);
+    expect(await res.json()).toEqual({ error: "AI processing failed" });
+    expect(db.updateRecording).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });
 

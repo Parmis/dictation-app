@@ -33,6 +33,16 @@ export function useRecordings(credentials: Credentials | null) {
     [credentials],
   );
 
+  const processWithAI = useCallback(
+    async (id: string) => {
+      if (!credentials) return null;
+      const updated = await api.processRecording(credentials, id);
+      setRecordings((prev) => prev.map((r) => (r.id === id ? updated : r)));
+      return updated;
+    },
+    [credentials],
+  );
+
   const remove = useCallback(
     async (id: string) => {
       if (!credentials) return;
@@ -42,5 +52,5 @@ export function useRecordings(credentials: Credentials | null) {
     [credentials],
   );
 
-  return { recordings, loading, error, fetchAll, update, remove };
+  return { recordings, loading, error, fetchAll, update, processWithAI, remove };
 }
