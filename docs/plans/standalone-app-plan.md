@@ -1,5 +1,28 @@
 # Dictation App — Standalone Plan
 
+> **Status: ✅ Completed (2026).** This is the original scaffolding plan, kept as a historical
+> reference. The code is the source of truth; some details below have drifted:
+>
+> - `POST /api/v1/dictation/finalize` (item 8) was never built — it was superseded by the
+>   recordings API (`POST /api/v1/recordings`, see [recordings-plan.md](recordings-plan.md)).
+> - PostgreSQL is exposed on host port **5433** (not 5432) in `docker-compose.yml`.
+> - `scripts/dev.sh` has outgrown the sketch in item 14 (waits for `pg_isready`, creates
+>   `.env` automatically, does not launch the Tauri app itself).
+> - Real speech-to-text transcription over the WebSocket is still a placeholder.
+>
+> For current setup see the [README](../../README.md); for remaining work see the [roadmap](../../ROADMAP.md).
+
+## Phase Status
+
+- [x] Phase 1 — Project scaffolding (Tauri app + server)
+- [x] Phase 2 — Backend endpoints (pair, /me, health, audio WS; finalize superseded by recordings API)
+- [x] Phase 3 — Database schema & migrations, seed script
+- [x] Phase 4 — Local development environment (docker-compose, .env, dev.sh)
+- [x] Phase 5 — Frontend configuration (config.ts, tauri.conf.json)
+- [x] Phase 6 — Admin tooling (shortcode CLI + API)
+- [x] Phase 7 — Testing (app + server Vitest suites)
+- [ ] Deferred (post-localhost) items — tracked in [ROADMAP.md](../../ROADMAP.md)
+
 A fully independent dictation desktop app with its own backend, database, and auth. Built with Tauri v2 (React frontend + Rust shell) and a lightweight Node.js backend. This plan focuses on getting everything running on localhost first.
 
 ---

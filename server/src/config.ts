@@ -17,6 +17,10 @@ export const config = {
   azureOpenaiEndpoint: process.env.AZURE_OPENAI_ENDPOINT || "",
   azureOpenaiDeployment: process.env.AZURE_OPENAI_DEPLOYMENT || "whisper",
 
+  // AI processing (recordings)
+  openaiApiKey: process.env.OPENAI_API_KEY || "",
+  openaiModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
+
   // Admin
   adminApiKey: process.env.ADMIN_API_KEY || "dev-admin-key",
 };

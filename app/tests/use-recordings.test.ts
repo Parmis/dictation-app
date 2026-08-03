@@ -5,6 +5,7 @@ vi.mock("../src/lib/api", () => ({
   listRecordings: vi.fn(),
   createRecording: vi.fn(),
   updateRecording: vi.fn(),
+  processRecording: vi.fn(),
   deleteRecording: vi.fn(),
 }));
 
@@ -38,6 +39,7 @@ const recordingB: Recording = {
 beforeEach(() => {
   vi.mocked(api.listRecordings).mockReset();
   vi.mocked(api.updateRecording).mockReset();
+  vi.mocked(api.processRecording).mockReset();
   vi.mocked(api.deleteRecording).mockReset();
 });
 
@@ -100,6 +102,38 @@ describe("update", () => {
       title: "Renamed",
     });
     expect(result.current.recordings).toEqual([updated, recordingB]);
+  });
+});
+
+describe("processWithAI", () => {
+  it("replaces the processed recording in state and returns it", async () => {
+    vi.mocked(api.listRecordings).mockResolvedValue([recordingA, recordingB]);
+    const processed = { ...recordingA, text: "First recording, formatted." };
+    vi.mocked(api.processRecording).mockResolvedValue(processed);
+
+    const { result } = renderHook(() => useRecordings(credentials));
+
+    await act(async () => {
+      await result.current.fetchAll();
+    });
+    let returned: Recording | null = null;
+    await act(async () => {
+      returned = await result.current.processWithAI("rec-a");
+    });
+
+    expect(api.processRecording).toHaveBeenCalledWith(credentials, "rec-a");
+    expect(returned).toEqual(processed);
+    expect(result.current.recordings).toEqual([processed, recordingB]);
+  });
+
+  it("does nothing without credentials", async () => {
+    const { result } = renderHook(() => useRecordings(null));
+
+    await act(async () => {
+      await result.current.processWithAI("rec-a");
+    });
+
+    expect(api.processRecording).not.toHaveBeenCalled();
   });
 });
 

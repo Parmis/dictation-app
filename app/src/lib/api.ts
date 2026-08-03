@@ -54,6 +54,15 @@ export async function updateRecording(
   });
 }
 
+export async function processRecording(
+  credentials: Credentials,
+  id: string,
+): Promise<Recording> {
+  return apiFetch(`/recordings/${id}/process`, credentials, {
+    method: "POST",
+  });
+}
+
 export async function deleteRecording(
   credentials: Credentials,
   id: string,

@@ -7,6 +7,7 @@ import {
   updateRecording,
   deleteRecording,
 } from "../db/recordings.js";
+import { isAiConfigured, processTranscript } from "../services/openai.js";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -106,6 +107,53 @@ router.put("/api/v1/recordings/:id", async (req, res) => {
     res.json(recording);
   } catch (err) {
     console.error("Update recording error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/api/v1/recordings/:id/process", async (req, res) => {
+  try {
+    if (!UUID_RE.test(req.params.id)) {
+      res.status(404).json({ error: "Recording not found" });
+      return;
+    }
+
+    if (!isAiConfigured()) {
+      res
+        .status(503)
+        .json({ error: "AI processing is not configured (set OPENAI_API_KEY)" });
+      return;
+    }
+
+    const userId = req.userId!;
+    const recording = await getRecording(userId, req.params.id);
+
+    if (!recording) {
+      res.status(404).json({ error: "Recording not found" });
+      return;
+    }
+
+    let processed: string;
+    try {
+      processed = await processTranscript(recording.text);
+    } catch (err) {
+      console.error("AI processing error:", err);
+      res.status(502).json({ error: "AI processing failed" });
+      return;
+    }
+
+    const updated = await updateRecording(userId, req.params.id, {
+      text: processed,
+    });
+
+    if (!updated) {
+      res.status(404).json({ error: "Recording not found" });
+      return;
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Process recording error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
