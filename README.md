@@ -2,10 +2,23 @@
 
 A desktop dictation app built with Tauri v2 (React + Rust) and a lightweight Node.js backend.
 
-> **Current status:** the end-to-end flow (pairing, recording, saving, editing, AI processing)
-> works, but real speech-to-text is not wired up yet — the WebSocket transcription returns a
-> `"[transcription placeholder]"` string until Azure/Whisper is integrated.
+> **Current status:** pairing, the recordings CRUD API, the list/detail screens and AI processing
+> all work. Real speech-to-text is **not** wired up: `/audio-stream` echoes a
+> `"[transcription placeholder]"` message with `isFinal: false`, and the app only appends final
+> chunks — so dictating produces an empty transcript and nothing is auto-saved. To exercise the
+> recordings flow today, create recordings through the API (see
+> [Test the API directly with curl](#test-the-api-directly-with-curl)).
 > See [ROADMAP.md](ROADMAP.md) for planned work and [docs/plans/](docs/plans/) for completed plans.
+
+## Features
+
+| Area           | What it does                                                             |
+| -------------- | ------------------------------------------------------------------------ |
+| Pairing        | One-time shortcode exchanged for an organization token, stored in the app |
+| Dictation      | Mic capture streamed over WebSocket; `F2` toggles record/stop while the app window has focus |
+| Settings       | Pick the input audio device (not persisted between launches yet)          |
+| Recordings     | List, open, rename, edit text, delete                                     |
+| AI processing  | "Process with AI" rewrites a recording's text via OpenAI, in place        |
 
 ## Prerequisites
 
@@ -68,8 +81,11 @@ npm run tauri dev  # opens the desktop app
 
 1. Start Postgres + server: `./scripts/dev.sh` (prints a shortcode).
 2. In another terminal: `cd app && npm run dev`, then open `http://localhost:1420`.
-3. Pair with the printed shortcode, press Record, speak, press Stop.
-4. The transcript auto-saves as a recording and you're taken to the Recordings list, where you can open, edit, delete, and process it with AI.
+3. Pair with the printed shortcode, press Record, speak, press Stop. The connection and mic
+   capture work, but the transcript stays empty until real transcription is wired up, so no
+   recording is saved.
+4. To see the Recordings screens with real data, create a recording with curl (below), then open
+   **Recordings** in the app — from there you can open, edit, delete, and process it with AI.
 
 ### Test the API directly with curl
 
@@ -183,7 +199,7 @@ See [.env.example](.env.example) for the full template.
 | ------------------- | --------------- | ---------------------------------------- |
 | `PORT`              | `3000`          | Server port                              |
 | `PGHOST`            | `localhost`     | PostgreSQL host                          |
-| `PGPORT`            | `5433`          | PostgreSQL port (docker-compose maps 5433 → 5432) |
+| `PGPORT`            | `5433`          | PostgreSQL port; docker-compose maps 5433 → 5432 (the server falls back to `5432` when unset, so keep it in `.env`) |
 | `PGDATABASE`        | `dictation`     | Database name                            |
 | `PGUSER`            | `dictation`     | Database user                            |
 | `PGPASSWORD`        | `dictation`     | Database password                        |
